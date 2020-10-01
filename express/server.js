@@ -1,5 +1,6 @@
 const express = require('express')
 const serverless = require('serverless-http')
+const bodyParser = require('body-parser')
 
 exports.handler = function (event, context, callback) {
 	callback(null, {
