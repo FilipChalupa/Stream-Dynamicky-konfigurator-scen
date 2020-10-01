@@ -90,10 +90,9 @@ app.use('/', async (request, response) => {
 
 		await sheet.loadCells(`B${firstRowIndex + 1}:G${lastRowIndex + 1}`)
 
-		let rowDate = targetDate
 		const targetRowIndex = (() => {
 			for (let rowIndex = firstRowIndex; rowIndex <= lastRowIndex; rowIndex++) {
-				rowDate = dateStringToObject(
+				const rowDate = dateStringToObject(
 					sheet.getCell(rowIndex, dateColumnIndex).value,
 				)
 				if (dateObjectToNumber(rowDate) > dateObjectToNumber(targetDate)) {
@@ -104,8 +103,11 @@ app.use('/', async (request, response) => {
 		const title = sheet.getCell(targetRowIndex, titleColumnIndex).value
 		const time = sheet.getCell(targetRowIndex, timeColumnIndex).value
 		const lecturer = sheet.getCell(targetRowIndex, lecturerColumnIndex).value
-		const date = `${rowDate.day}. ${monthNames[rowDate.month - 1]} ${
-			rowDate.year
+		const rawDate = dateStringToObject(
+			sheet.getCell(targetRowIndex, dateColumnIndex).value,
+		)
+		const date = `${rawDate.day}. ${monthNames[rawDate.month - 1]} ${
+			rawDate.year
 		}`
 
 		const items = [
@@ -151,6 +153,7 @@ app.use('/', async (request, response) => {
 			.join('&')}`
 
 		response.redirect(302, sceneUrl)
+		response.end()
 	} catch (error) {
 		console.error(error)
 		response.redirect(302, sceneBaseUrl)
