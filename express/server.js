@@ -151,7 +151,6 @@ app.use('/', async (request, response) => {
 			.join('&')}`
 
 		response.redirect(302, sceneUrl)
-		response.send(`<a href="${sceneUrl}" target="_blank">${sceneUrl}</a>`)
 	} catch (error) {
 		console.error(error)
 		response.redirect(302, sceneBaseUrl)
