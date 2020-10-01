@@ -10,9 +10,9 @@ GOOGLE_API_KEY='AI…' npm start
 
 ## Scény
 
-´´´bash
+```bash
 npm ci && npm start
-´´´
+```
 
 - Úvodní: http://localhost:3000/?scene=intro
 - Přestávka: http://localhost:3000/?scene=break
