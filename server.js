@@ -31,6 +31,8 @@ app.get('/', async (request, response) => {
 			})(),
 	)
 
+	const sceneName = request.query.scene || 'intro' // intro, break, outro
+
 	doc.useApiKey('@TODO')
 	await doc.loadInfo()
 	const sheet = doc.sheetsByIndex[0]
@@ -98,28 +100,45 @@ app.get('/', async (request, response) => {
 		rowDate.year
 	}`
 
-	const sceneUrl = `${sceneBaseUrl}?${[
+	const items = [
 		{
 			name: 'title',
-			value: `DA WEB: ${title}`,
+			value:
+				sceneName === 'intro'
+					? `DA WEB: ${title}`
+					: sceneName === 'break'
+					? 'Přestávka'
+					: sceneName === 'outro'
+					? 'Konec'
+					: '',
 		},
-		{
-			name: 'meta1',
-			value: lecturer,
-		},
-		{
-			name: 'meta2',
-			value: `${date} | ${time}`,
-		},
-		{
-			name: 'meta3',
-			value: 'Praha',
-		},
-		{
-			name: 'icon',
-			value: icons.find((item) => item.pattern.test(title))?.url,
-		},
+		...(sceneName === 'intro' || sceneName === 'outro'
+			? [
+					{
+						name: 'meta1',
+						value: lecturer,
+					},
+					{
+						name: 'meta2',
+						value: `${date} | ${time}`,
+					},
+					{
+						name: 'meta3',
+						value: 'Praha',
+					},
+			  ]
+			: []),
+		...(sceneName === 'intro'
+			? [
+					{
+						name: 'icon',
+						value: icons.find((item) => item.pattern.test(title))?.url,
+					},
+			  ]
+			: []),
 	]
+
+	const sceneUrl = `${sceneBaseUrl}?${items
 		.map((item) => `${item.name}=${encodeURIComponent(item.value)}`)
 		.join('&')}`
 
