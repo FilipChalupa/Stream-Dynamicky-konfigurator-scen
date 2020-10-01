@@ -142,7 +142,7 @@ app.use('/', async (request, response) => {
 				? [
 						{
 							name: 'icon',
-							value: icons.find((item) => item.pattern.test(title))?.url,
+							value: icons.find((item) => item.pattern.test(title))?.url || '',
 						},
 				  ]
 				: []),
