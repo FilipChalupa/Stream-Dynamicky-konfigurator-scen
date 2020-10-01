@@ -95,8 +95,8 @@ app.use('/', async (request, response) => {
 				const rowDate = dateStringToObject(
 					sheet.getCell(rowIndex, dateColumnIndex).value,
 				)
-				if (dateObjectToNumber(rowDate) > dateObjectToNumber(targetDate)) {
-					return rowIndex - 1
+				if (dateObjectToNumber(rowDate) >= dateObjectToNumber(targetDate)) {
+					return rowIndex
 				}
 			}
 		})()
