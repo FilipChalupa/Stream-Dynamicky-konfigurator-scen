@@ -10,6 +10,10 @@ GOOGLE_API_KEY='AI…' npm start
 
 ## Scény
 
+´´´bash
+npm ci && npm start
+´´´
+
 - Úvodní: http://localhost:3000/?scene=intro
 - Přestávka: http://localhost:3000/?scene=break
 - Konec: http://localhost:3000/?scene=outro
@@ -17,3 +21,9 @@ GOOGLE_API_KEY='AI…' npm start
 ---
 
 - Vlastní datum: http://localhost:3000/?date=16.9.2020
+
+### Veřejné adresy
+
+- Úvodní: https://czechitas-scene.netlify.app/.netlify/functions/server?scene=intro
+- Přestávka: https://czechitas-scene.netlify.app/.netlify/functions/server?scene=break
+- Konec: https://czechitas-scene.netlify.app/.netlify/functions/server?scene=outro
