@@ -9,6 +9,8 @@ const doc = new GoogleSpreadsheet(
 	'1g9QiuOq67P310KgOoWJyyRDqR9BXSdQFIT23YWoG2LI',
 )
 
+const googleApiKey = process.env.GOOGLE_API_KEY
+
 const firstRowIndex = 2
 const lastRowIndex = 99
 const dateColumnIndex = 1
@@ -83,7 +85,7 @@ app.use('/', async (request, response) => {
 
 		const sceneName = request.query.scene || 'intro' // intro, break, outro
 
-		doc.useApiKey('@TODO')
+		doc.useApiKey(googleApiKey)
 		await doc.loadInfo()
 		const sheet = doc.sheetsByIndex[0]
 
