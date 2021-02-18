@@ -31,7 +31,7 @@ const monthNames = [
 	'prosinec',
 ]
 const sceneBaseUrl =
-	'https://czechitas-podklady-web.github.io/Stream-Konfigurator-scen/scena.html'
+	'https://czechitas-podklady-web.github.io/Konfigurator-slidu/slide.html'
 const icons = [
 	{
 		pattern: /html.*css/i,
