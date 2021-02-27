@@ -4,11 +4,17 @@ const app = express()
 const bodyParser = require('body-parser')
 const { GoogleSpreadsheet } = require('google-spreadsheet')
 
-const doc = new GoogleSpreadsheet(
-	'1g9QiuOq67P310KgOoWJyyRDqR9BXSdQFIT23YWoG2LI',
-)
-
+const sheetId = process.env.SHEET_ID
 const googleApiKey = process.env.GOOGLE_API_KEY
+
+if (!sheetId) {
+	throw new Error('SHEET_ID is missing.')
+}
+if (!googleApiKey) {
+	throw new Error('GOOGLE_API_KEY is missing.')
+}
+
+const doc = new GoogleSpreadsheet(sheetId)
 
 const firstRowIndex = 2
 const lastRowIndex = 99
