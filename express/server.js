@@ -14,14 +14,6 @@ if (!googleApiKey) {
 	throw new Error('GOOGLE_API_KEY is missing.')
 }
 
-const doc = new GoogleSpreadsheet(sheetId)
-
-const firstRowIndex = 2
-const lastRowIndex = 99
-const dateColumnIndex = 1
-const timeColumnIndex = 4
-const titleColumnIndex = 5
-const lecturerColumnIndex = 6
 const monthNames = [
 	'leden',
 	'únor',
@@ -72,6 +64,65 @@ const dateObjectToNumber = (date) => {
 	return date.year * 10000 + date.month * 100 + date.day
 }
 
+const loadData = async () => {
+	const headersRowIndex = 0
+
+	const doc = new GoogleSpreadsheet(sheetId)
+	doc.useApiKey(googleApiKey)
+	await doc.loadInfo()
+	const sheet = doc.sheetsByIndex[0]
+	const rows = await sheet.getRows()
+	const data = rows.map((row) => row._rawData)
+	const headers = data[headersRowIndex]
+
+	const categorizedData = {
+		date: [],
+		title: [],
+		time: [],
+		lecturer: [],
+	}
+
+	const columnOffsetsFromDate = {
+		title: 1,
+		time: 2,
+		lecturer: 3,
+	}
+	const dateColumnIndexes = headers
+		.map((header, index) => (header === 'Datum' ? index : null))
+		.filter((columnIndex) => columnIndex !== null)
+
+	data.slice(headersRowIndex + 1, headersRowIndex + 1 + 2 * 7).map((row) => {
+		dateColumnIndexes.forEach((dateIndex) => {
+			categorizedData.date.push(row[dateIndex])
+			categorizedData.title.push(row[dateIndex + columnOffsetsFromDate.title])
+			categorizedData.time.push(row[dateIndex + columnOffsetsFromDate.time])
+			categorizedData.lecturer.push(
+				row[dateIndex + columnOffsetsFromDate.lecturer],
+			)
+		})
+	})
+
+	const cleanData = categorizedData.date
+		.map((_, i) => ({
+			date: (categorizedData.date[i] || '').trim(),
+			title: (categorizedData.title[i] || '').trim(),
+			time: (categorizedData.time[i] || '').trim(),
+			lecturer: (categorizedData.lecturer[i] || '').trim(),
+		}))
+		.filter(
+			(row) =>
+				(row.title.length > 0 || row.time.length > 0) &&
+				row.lecturer.length > 0,
+		)
+		.map((row) => ({
+			...row,
+			date: dateStringToObject(row.date),
+		}))
+		.sort((a, b) => dateObjectToNumber(a.date) - dateObjectToNumber(b.date))
+
+	return cleanData
+}
+
 const router = express.Router()
 
 app.use(bodyParser.json())
@@ -90,30 +141,27 @@ app.use('/', async (request, response) => {
 
 		const sceneName = request.query.scene || 'intro' // intro, break, outro
 
-		doc.useApiKey(googleApiKey)
-		await doc.loadInfo()
-		const sheet = doc.sheetsByIndex[0]
+		const data = await loadData()
 
-		await sheet.loadCells(`B${firstRowIndex + 1}:G${lastRowIndex + 1}`)
-
-		const targetRowIndex = (() => {
-			for (let rowIndex = firstRowIndex; rowIndex <= lastRowIndex; rowIndex++) {
-				const rowDate = dateStringToObject(
-					sheet.getCell(rowIndex, dateColumnIndex).value,
-				)
-				if (dateObjectToNumber(rowDate) >= dateObjectToNumber(targetDate)) {
-					return rowIndex
+		const targetDateDataIndex = (() => {
+			let result = data.length - 1
+			while (result > 0) {
+				if (
+					dateObjectToNumber(targetDate) >=
+					dateObjectToNumber(data[result].date)
+				) {
+					break
 				}
+				result--
 			}
+			return result
 		})()
-		const title = sheet.getCell(targetRowIndex, titleColumnIndex).value
-		const time = sheet.getCell(targetRowIndex, timeColumnIndex).value
-		const lecturer = sheet.getCell(targetRowIndex, lecturerColumnIndex).value
-		const rawDate = dateStringToObject(
-			sheet.getCell(targetRowIndex, dateColumnIndex).value,
-		)
-		const date = `${rawDate.day}. ${monthNames[rawDate.month - 1]} ${
-			rawDate.year
+
+		const target = data[targetDateDataIndex]
+
+		const { title, time, lecturer, date } = target
+		const formattedDate = `${date.day}. ${monthNames[date.month - 1]} ${
+			date.year
 		}`
 
 		const items = [
@@ -136,7 +184,7 @@ app.use('/', async (request, response) => {
 						},
 						{
 							name: 'meta2',
-							value: `${date} | ${time}`,
+							value: `${formattedDate} | ${time}`,
 						},
 						{
 							name: 'meta3',
